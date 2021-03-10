@@ -12,6 +12,11 @@ Plug in your Logitech reciever and it will be automatically dumped thanks to @ma
 
 And on top of that if you have his [logitacker](https://github.com/mame82/LOGITacker) plugged in, it will automatically pair with it. So you can have a encrypted backdoor access.
 
+## Keystrokes_to_Duckyscript_analyzer.py
+Plug-in BadUSB and capture the keystrokes & get duckyscript!
+
+**Tip:** *Run this script over SSH and plug BadUSB in RPI!*
+
 # DISCLAIMER
 This repository should be used for authorized testing and/or educational purposes only. 
 The only exception is using it against devices or a network, owned by yourself.
