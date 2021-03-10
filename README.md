@@ -8,11 +8,15 @@ Well I have a solution for you. Here I will be posting scripts that should help 
 The main goal is to have a service (or series of scripts) that will recognize a type of usb device and run specific attack automatically and headlessly.
 
 ## LogitechDump.py
+[[source]](LogitechDump.py)
+
 Plug in your Logitech reciever and it will be automatically dumped thanks to @mame82's [munifying](https://github.com/mame82/munifying).
 
 And on top of that if you have his [logitacker](https://github.com/mame82/LOGITacker) plugged in, it will automatically pair with it. So you can have a encrypted backdoor access.
 
 ## Keystrokes_to_Duckyscript_analyzer.py
+[[source]](Keystrokes_to_Duckyscript_analyzer.py)
+
 Plug-in BadUSB and capture the keystrokes & get duckyscript!
 
 **Tip:** *Run this script over SSH and plug BadUSB in RPI!*
