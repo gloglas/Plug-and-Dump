@@ -1,4 +1,4 @@
-import sys, time, json
+import sys, time, json, os
 import keyboard # https://github.com/boppreh/keyboard
 if __name__ == "__main__":
     import argparse
@@ -57,7 +57,7 @@ def print_pressed_keys(e):
     global lastevent
     global actualLine
     global dontprint
-    
+        
     if e.scan_code in scan_codes:
         e.name = scan_codes[e.scan_code]
     if e.name in rev_canonical_names:
@@ -158,10 +158,15 @@ def stop_gethook():
     if output_log_file is not None:
         with open(output_log_file, "a") as af:
             af.write("{}]")
+        if len(i) == 0:
+            os.remove(output_log_file)
     if ducky_file is not None:
-        with open(output_log_file, "w") as wf:
+        with open(ducky_file, "w") as wf:
             for var in i:
                 wf.write(var + "\n")
+        if len(i) == 0:
+            os.remove(ducky_file)
+
     cleanup()
     return i
 def wait():
