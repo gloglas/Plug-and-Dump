@@ -13,11 +13,12 @@ input_log_file = None
 output_log_file = None
 ducky_file = None
 
-# I don't wanna modify the library
+# I don't wanna modify the library...
+# but I did it anyway: https://github.com/boppreh/keyboard/pull/429
 def _getjson(a, ensure_ascii=False):
     attrs = dict(
         (attr, getattr(a, attr)) for attr in ['event_type', 'scan_code', 'name', 'time', 'device', 'is_keypad','modifiers']
-        if not attr.startswith('_') # and getattr(self, attr) is not None # Library doesn't export modifiers
+        if not attr.startswith('_')
     )
     return json.dumps(attrs, ensure_ascii=ensure_ascii)
 
@@ -26,6 +27,7 @@ rev_canonical_names = {
     'prior': 'pageup',
     "select": "end",
     "find": "home",
+    "space": "spacebar",
 }
 scan_codes = {
     99: "PRINTSCREEN",
@@ -51,6 +53,15 @@ def cleanup():
     input_log_file = None
     output_log_file = None
     ducky_file = None
+
+def save_pressed_keys(e):
+    #Save only keys to get no errors in keypress logs
+    if e.scan_code in scan_codes:
+        e.name = scan_codes[e.scan_code]
+    if e.name in rev_canonical_names:
+        e.name = rev_canonical_names[e.name]
+    with open("/tmp/.duckylog", "a") as af:
+        af.write(_getjson(e) + ",")
 
 def print_pressed_keys(e):
     global script
@@ -83,10 +94,14 @@ def print_pressed_keys(e):
         if not e.modifiers and not keyboard.is_modifier(e.scan_code) and len(e.name) == 1:
             if actualLine is None:
                 actualLine = "STRING "
+            elif e.name in actualLine:
+                pass
             actualLine = actualLine + e.name
         
         else:
             if actualLine is not None:
+                if e.name in actualLine:
+                    pass
                 if actualLine.startswith("STRING"):
                     if actualLine is not None:
                         script.append(actualLine)
@@ -104,8 +119,7 @@ def print_pressed_keys(e):
                     if not dontprint:
                         script.append(actualLine)
                     
-                    actualLine = actualLine.replace(e.name, "").replace("  "," ")
-                    actualLine = (actualLine, actualLine[1:])[actualLine.startswith(" ")]
+                    actualLine = actualLine.replace(e.name, "").replace("  "," ").strip()
                     actualLine = (actualLine, None)[actualLine == ""]
                     if actualLine is not None:
                         dontprint = True
@@ -124,7 +138,9 @@ def hook(duckyfile=None, logfile=None):
         with open(output_log_file, "w") as wf:
             wf.write("[")
     
-    keyboard.hook(print_pressed_keys)
+    with open("/tmp/.duckylog", "w") as wf:
+            wf.write("[")
+    keyboard.hook(save_pressed_keys)
 
 def fromFile(inputfile,duckyfile=None):
     global ducky_file
@@ -133,7 +149,7 @@ def fromFile(inputfile,duckyfile=None):
     with open(inputfile) as json_file:
         data = json.load(json_file)
 
-    for var in data:          
+    for var in data:
         x = json.dumps(var)
         if x != "{}":
             print_pressed_keys(keyboard.KeyboardEvent(**json.loads(x)))
@@ -166,11 +182,14 @@ def stop_gethook():
                 wf.write(var + "\n")
         if len(i) == 0:
             os.remove(ducky_file)
+    
+    with open("/tmp/.duckylog", "a") as af:
+            af.write("{}]")
+    fromFile("/tmp/.duckylog", ducky_file)
+    os.system("rm -rf /tmp/.duckylog")
 
     cleanup()
     return i
-def wait():
-    keyboard.wait()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Keystrokes to duckyscript')
