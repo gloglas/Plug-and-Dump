@@ -8,10 +8,12 @@ dontprint = True
 lastevent = None
 actualLine = None
 delay_threshold=200
+keys_count=0
 
 input_log_file = None
 output_log_file = None
 ducky_file = None
+
 
 # I don't wanna modify the library...
 # but I did it anyway: https://github.com/boppreh/keyboard/pull/429
@@ -45,6 +47,7 @@ def cleanup():
     global input_log_file
     global output_log_file
     global ducky_file
+    global keys_count
 
     script=[]
     dontprint = True
@@ -53,8 +56,11 @@ def cleanup():
     input_log_file = None
     output_log_file = None
     ducky_file = None
+    keys_count = 0
 
 def save_pressed_keys(e):
+    global keys_count
+    global script
     #Save only keys to get no errors in keypress logs
     if e.scan_code in scan_codes:
         e.name = scan_codes[e.scan_code]
@@ -62,6 +68,8 @@ def save_pressed_keys(e):
         e.name = rev_canonical_names[e.name]
     with open("/tmp/.duckylog", "a") as af:
         af.write(_getjson(e) + ",")
+    if e.event_type == "up":
+        keys_count = keys_count + 1
 
 def print_pressed_keys(e):
     global script
@@ -138,13 +146,19 @@ def hook(duckyfile=None, logfile=None):
         with open(output_log_file, "w") as wf:
             wf.write("[")
     
+    os.system("rm -f /tmp/.duckylog")
     with open("/tmp/.duckylog", "w") as wf:
-            wf.write("[")
+        wf.write("[")
     keyboard.hook(save_pressed_keys)
 
 def fromFile(inputfile,duckyfile=None):
     global ducky_file
     global script
+    global output_log_file
+    if duckyfile is not None:
+        ducky_file=duckyfile
+    output_log_file = None
+    
     i = script
     with open(inputfile) as json_file:
         data = json.load(json_file)
@@ -166,11 +180,12 @@ def fromFile(inputfile,duckyfile=None):
     
 def stop_gethook():
     global script
+    
     i = script
     keyboard.unhook_all()
     if actualLine is not None:
         i.append(actualLine)
-    
+
     if output_log_file is not None:
         with open(output_log_file, "a") as af:
             af.write("{}]")
@@ -184,10 +199,10 @@ def stop_gethook():
             os.remove(ducky_file)
     
     with open("/tmp/.duckylog", "a") as af:
-            af.write("{}]")
+        af.write("{}]")
+    x = output_log_file
     fromFile("/tmp/.duckylog", ducky_file)
-    os.system("rm -rf /tmp/.duckylog")
-
+    os.system("cp -f /tmp/.duckylog " + x)
     cleanup()
     return i
 
