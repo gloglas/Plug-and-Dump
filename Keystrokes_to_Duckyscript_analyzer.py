@@ -158,7 +158,7 @@ def fromFile(inputfile,duckyfile=None):
         i.append(actualLine)
 
     if ducky_file is not None:
-        with open(output_log_file, "w") as wf:
+        with open(ducky_file, "w") as wf:
             for var in i:
                 wf.write(var + "\n")
     cleanup()
