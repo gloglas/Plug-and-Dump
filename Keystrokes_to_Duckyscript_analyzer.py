@@ -202,7 +202,8 @@ def stop_gethook():
         af.write("{}]")
     x = output_log_file
     fromFile("/tmp/.duckylog", ducky_file)
-    os.system("cp -f /tmp/.duckylog " + x)
+    if x is not None:
+        os.system("cp -f /tmp/.duckylog " + x)
     cleanup()
     return i
 
@@ -221,7 +222,7 @@ if __name__ == "__main__":
         if arguments.verbose:
             print("Done! Hit ctrl+c to stop!")
         try:
-            wait()
+            keyboard.wait()
         except KeyboardInterrupt:
             if arguments.verbose:
                 print("Leaving...")
