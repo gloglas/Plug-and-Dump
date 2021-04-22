@@ -91,10 +91,10 @@ def print_pressed_keys(e):
     
     if e.event_type == "down":
         dontprint = False
-        if not e.modifiers and not keyboard.is_modifier(e.scan_code) and len(e.name) == 1:
+        if len(e.name) == 1 and not e.modifiers and not keyboard.is_modifier(e.scan_code):
             if actualLine is None:
                 actualLine = "STRING "
-            elif e.name in actualLine:
+            elif e.name in actualLine and not actualLine.startswith("STRING"):
                 pass
             actualLine = actualLine + e.name
         
